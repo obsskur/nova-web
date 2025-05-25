@@ -3,8 +3,8 @@ const output = document.getElementById("output");
 
 commandInput.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
-    event.preventDefault();
-    const command = commandInput.value;
+    event.preventDefault(); // Prevent newline
+    const command = commandInput.value.trim();
     if (command !== "") {
       output.innerHTML += `$ ${command}\n`;
     }
