@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Termenal</title> <!-- Your intentionally misspelled tab title -->
+  <title>Termenal</title>
   <style>
     body {
       margin: 0;
@@ -16,6 +16,16 @@
       white-space: pre-wrap;
       overflow-y: auto;
       height: 100vh;
+      box-sizing: border-box;
+    }
+    #output {
+      margin-bottom: 5px;
+    }
+    #input-line {
+      display: flex;
+    }
+    #input-line span {
+      flex-shrink: 0;
     }
     #command {
       background: black;
@@ -31,7 +41,9 @@
 <body>
   <div id="terminal">
     <pre id="output"></pre>
-    <label>$ <input type="text" id="command" autofocus /></label>
+    <div id="input-line">
+      <span>$ </span><input type="text" id="command" autofocus />
+    </div>
   </div>
 
   <script>
@@ -40,17 +52,17 @@
 
     commandInput.addEventListener("keydown", function(event) {
       if (event.key === "Enter") {
-        event.preventDefault(); // Prevent line breaks in the input
+        event.preventDefault();
         const command = commandInput.value.trim();
 
         if (command === "clear") {
-          output.textContent = ""; // ← Clears terminal output
+          output.textContent = "";
         } else if (command !== "") {
           output.textContent += `$ ${command}\n`;
         }
 
-        commandInput.value = ""; // Clear input box
-        // Auto scroll to bottom
+        commandInput.value = "";
+        // Scroll to bottom
         output.parentElement.scrollTop = output.parentElement.scrollHeight;
       }
     });
