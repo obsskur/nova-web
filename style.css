@@ -17,20 +17,26 @@ body {
 
 #input-line {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .prompt {
   margin-right: 5px;
   color: limegreen;
+  padding-top: 4px;
 }
 
 #command {
   background: transparent;
   border: none;
   outline: none;
+  resize: none;
   color: limegreen;
   font-family: monospace;
   font-size: 16px;
   width: 100%;
+  height: auto;
+  min-height: 1em;
+  line-height: 1.2em;
+  overflow-y: hidden;
 }
