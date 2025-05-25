@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: limegreen;
+  font-family: monospace;
+  font-size: 16px;
+}
+
+#terminal {
+  padding: 20px;
+}
+
+#output {
+  white-space: pre-wrap;
+}
+
+#input-line {
+  display: flex;
+  align-items: center;
+}
+
+.prompt {
+  margin-right: 5px;
+  color: limegreen;
+}
+
+#command {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: limegreen;
+  font-family: monospace;
+  font-size: 16px;
+  width: 100%;
+}
