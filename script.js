@@ -1,20 +1,51 @@
-const commandInput = document.getElementById("command");
-const output = document.getElementById("output");
+<script>
+  const commandInput = document.getElementById("command");
+  const output = document.getElementById("output");
 
-commandInput.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
-    event.preventDefault(); // Prevent newline
-    const command = commandInput.value.trim();
+  const commands = {
+    clear: {
+      description: "Clears the terminal",
+      action: () => {
+        output.innerHTML = "";
+      }
+    },
+    cmd: {
+      description: "Lists all available commands",
+      action: () => {
+        let helpText = "Available commands:\n";
+        for (const cmd in commands) {
+          helpText += `- ${cmd}: ${commands[cmd].description}\n`;
+        }
+        printOutput(helpText.trim());
+      }
+    },
+  };
 
-    if (command !== "") {
-      if (command.toLowerCase() === "clear") {
-        output.innerHTML = ""; // Clear the console
-      } else {
-        output.innerHTML += `$ ${command}\n`;
+  function printOutput(text) {
+    const lines = text.split("\n");
+    lines.forEach(line => {
+      output.innerHTML += `<div>${line}</div>`;
+    });
+  }
+
+  commandInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const command = commandInput.value.trim();
+
+      if (command !== "") {
+        output.innerHTML += `<div>$ ${command}</div>`;
+        const baseCommand = command.split(" ")[0];
+
+        if (commands[baseCommand]) {
+          commands[baseCommand].action(command);
+        } else {
+          printOutput(`Unknown command: ${baseCommand}`);
+        }
+
+        commandInput.value = "";
+        output.parentElement.scrollTop = output.parentElement.scrollHeight;
       }
     }
-
-    commandInput.value = "";
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-});
+  });
+</script>
