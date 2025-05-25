@@ -13,18 +13,21 @@
     }
     #terminal {
       padding: 10px;
-      white-space: pre-wrap;
-      overflow-y: auto;
       height: 100vh;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
     }
     #output {
-      margin-bottom: 5px;
+      white-space: pre-wrap;
+      flex-grow: 1;
     }
     #input-line {
       display: flex;
+      align-items: center;
     }
-    #input-line span {
+    #prompt {
       flex-shrink: 0;
     }
     #command {
@@ -33,16 +36,17 @@
       color: #00ff00;
       font-family: monospace;
       font-size: 1em;
-      width: 100%;
+      flex-grow: 1;
       outline: none;
     }
   </style>
 </head>
 <body>
   <div id="terminal">
-    <pre id="output"></pre>
+    <div id="output"></div>
     <div id="input-line">
-      <span>$ </span><input type="text" id="command" autofocus />
+      <span id="prompt">$ </span>
+      <input type="text" id="command" autofocus />
     </div>
   </div>
 
@@ -56,9 +60,9 @@
         const command = commandInput.value.trim();
 
         if (command === "clear") {
-          output.textContent = "";
+          output.innerHTML = ""; // Clear terminal display
         } else if (command !== "") {
-          output.textContent += `$ ${command}\n`;
+          output.innerHTML += `<div>$ ${command}</div>`;
         }
 
         commandInput.value = "";
