@@ -1,42 +1,44 @@
 body {
+  background-color: black;
+  color: #00ff00;
+  font-family: monospace;
   margin: 0;
   padding: 0;
-  background-color: black;
-  color: limegreen;
-  font-family: monospace;
-  font-size: 16px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 #terminal {
-  padding: 20px;
-}
-
-#output {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
   white-space: pre-wrap;
 }
 
 #input-line {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #00ff00;
 }
 
-.prompt {
-  margin-right: 5px;
-  color: limegreen;
-  padding-top: 4px;
+#prompt {
+  color: #00ff00;
+  margin-right: 5px; /* This gives 1-space visual gap */
 }
 
 #command {
   background: transparent;
   border: none;
+  color: #00ff00;
   outline: none;
-  resize: none;
-  color: limegreen;
   font-family: monospace;
+  flex-grow: 1;
   font-size: 16px;
-  width: 100%;
-  height: auto;
-  min-height: 1em;
-  line-height: 1.2em;
-  overflow-y: hidden;
+}
+
+::selection {
+  background: #00ff00;
+  color: black;
 }
