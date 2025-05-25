@@ -18,7 +18,7 @@
         }
         printOutput(helpText.trim());
       }
-    },
+    }
   };
 
   function printOutput(text) {
@@ -32,20 +32,18 @@
     if (event.key === "Enter") {
       event.preventDefault();
       const command = commandInput.value.trim();
+      output.innerHTML += `<div>$ ${command}</div>`;
+      
+      const baseCommand = command.split(" ")[0];
 
-      if (command !== "") {
-        output.innerHTML += `<div>$ ${command}</div>`;
-        const baseCommand = command.split(" ")[0];
-
-        if (commands[baseCommand]) {
-          commands[baseCommand].action(command);
-        } else {
-          printOutput(`Unknown command: ${baseCommand}`);
-        }
-
-        commandInput.value = "";
-        output.parentElement.scrollTop = output.parentElement.scrollHeight;
+      if (commands[baseCommand]) {
+        commands[baseCommand].action(command);
+      } else if (command !== "") {
+        printOutput(`Unknown command: ${baseCommand}`);
       }
+
+      commandInput.value = "";
+      output.parentElement.scrollTop = output.parentElement.scrollHeight;
     }
   });
 </script>
