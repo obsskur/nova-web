@@ -1,19 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Terminal</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Terminal</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: black;
+    color: limegreen;
+    font-family: monospace;
+    font-size: 16px;
+  }
+  #terminal {
+    padding: 20px;
+    height: 90vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  #input-line {
+    display: flex;
+    align-items: center;
+  }
+  .prompt {
+    margin-right: 5px;
+    color: limegreen;
+    padding-top: 4px;
+  }
+  #command {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: limegreen;
+    font-family: monospace;
+    font-size: 16px;
+    width: 100%;
+  }
+</style>
 </head>
 <body>
-  <div id="terminal">
-    <pre id="output"></pre>
-    <div id="input-line">
-      <span class="prompt">$</span>
-      <textarea id="command" autofocus></textarea>
-    </div>
+
+<div id="terminal">
+  <pre id="output"></pre>
+  <div id="input-line">
+    <span class="prompt">$</span>
+    <input type="text" id="command" autofocus autocomplete="off" />
   </div>
-  <script src="script.js"></script>
+</div>
+
+<script>
+  const commandInput = document.getElementById("command");
+  const output = document.getElementById("output");
+
+  commandInput.addEventListener("keydown", function(event) {
+    if(event.key === "Enter") {
+      event.preventDefault();
+      const command = commandInput.value.trim();
+
+      if(command === "clear") {
+        output.textContent = "";  // clear console
+      } else if(command !== "") {
+        output.textContent += `$ ${command}\n`;
+      }
+
+      commandInput.value = "";
+      // Scroll to bottom
+      output.parentElement.scrollTop = output.parentElement.scrollHeight;
+    }
+  });
+</script>
+
 </body>
 </html>
