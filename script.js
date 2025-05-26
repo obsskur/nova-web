@@ -24,7 +24,9 @@
   function printOutput(text) {
     const lines = text.split("\n");
     lines.forEach(line => {
-      output.innerHTML += `<div>${line}</div>`;
+      const div = document.createElement("div");
+      div.textContent = line;
+      output.appendChild(div);
     });
   }
 
@@ -32,8 +34,13 @@
     if (event.key === "Enter") {
       event.preventDefault();
       const command = commandInput.value.trim();
-      output.innerHTML += `<div>$ ${command}</div>`;
-      
+
+      if (command !== "") {
+        const cmdLine = document.createElement("div");
+        cmdLine.textContent = `$ ${command}`;
+        output.appendChild(cmdLine);
+      }
+
       const baseCommand = command.split(" ")[0];
 
       if (commands[baseCommand]) {
