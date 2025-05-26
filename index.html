@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Termenal</title> <!-- keeping the fun misspelling per your request -->
+  <title>Terminal</title> <!-- fun intentional spelling -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="terminal">
-    <div id="output"></div>
+    <div id="panes">
+      <div id="command-log"></div>
+      <div id="output"></div>
+    </div>
     <div id="input-line">
       <span id="prompt">$</span>
       <input type="text" id="command" autocomplete="off" spellcheck="false" autofocus />
