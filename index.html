@@ -2,74 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Termenal</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: #00ff00;
-      font-family: monospace;
-    }
-    #terminal {
-      padding: 10px;
-      height: 100vh;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    #output {
-      white-space: pre-wrap;
-      flex-grow: 1;
-    }
-    #input-line {
-      display: flex;
-      align-items: center;
-    }
-    #prompt {
-      flex-shrink: 0;
-    }
-    #command {
-      background: black;
-      border: none;
-      color: #00ff00;
-      font-family: monospace;
-      font-size: 1em;
-      flex-grow: 1;
-      outline: none;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="terminal">
     <div id="output"></div>
     <div id="input-line">
-      <span id="prompt">$ </span>
+      <span id="prompt">$</span>
       <input type="text" id="command" autofocus />
     </div>
   </div>
 
-  <script>
-    const commandInput = document.getElementById("command");
-    const output = document.getElementById("output");
-
-    commandInput.addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        const command = commandInput.value.trim();
-
-        if (command === "clear") {
-          output.innerHTML = ""; // Clear terminal display
-        } else if (command !== "") {
-          output.innerHTML += `<div>$ ${command}</div>`;
-        }
-
-        commandInput.value = "";
-        // Scroll to bottom
-        output.parentElement.scrollTop = output.parentElement.scrollHeight;
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
