@@ -4,57 +4,74 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Snake.io</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    body, html {
+
+    html, body {
       height: 100%;
+      font-family: 'Inter', sans-serif;
       background-color: #000;
-      font-family: Arial, sans-serif;
-      color: white;
+      color: #fff;
       overflow: hidden;
     }
+
     .menu {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
       text-align: center;
       z-index: 2;
     }
+
     h1 {
-      font-size: 4em;
-      color: purple;
-      margin-bottom: 20px;
+      font-size: 3.5rem;
+      color: #b388ff;
+      letter-spacing: 1px;
     }
-    .play-btn {
-      padding: 15px 40px;
-      font-size: 1.5em;
-      background: black;
-      border: 2px solid purple;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 0 0px purple;
-    }
-    .play-btn:hover {
-      box-shadow: 0 0 20px purple;
-    }
-    .username-input {
-      margin-bottom: 20px;
-    }
+
     .username-input input {
-      padding: 10px;
-      font-size: 1em;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: 1px solid #b388ff;
+      background: #111;
+      color: #fff;
+      border-radius: 8px;
+      outline: none;
       width: 250px;
-      text-align: center;
-      border: 2px solid purple;
-      background: black;
-      color: white;
+      transition: border 0.3s;
     }
+
+    .username-input input:focus {
+      border-color: #c2a6ff;
+    }
+
+    .play-btn {
+      padding: 14px 36px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: #1a1a1a;
+      border: 2px solid #b388ff;
+      color: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .play-btn:hover {
+      box-shadow: 0 0 12px #b388ff;
+      background-color: #2a2a2a;
+    }
+
     #loadingScreen {
       display: none;
       position: absolute;
@@ -62,20 +79,23 @@
       left: 0;
       height: 100%;
       width: 100%;
-      background-color: purple;
+      background-color: #b388ff;
       justify-content: center;
       align-items: center;
       z-index: 3;
       animation: fillScreen 1s forwards;
     }
+
     #loadingScreen p {
-      font-size: 2em;
-      color: white;
+      font-size: 2rem;
+      color: #fff;
     }
+
     @keyframes fillScreen {
       from { height: 0%; }
       to { height: 100%; }
     }
+
     canvas {
       display: none;
     }
@@ -107,13 +127,14 @@
         loading.style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
         if (typeof initGame === 'function') {
-          initGame(); // Defined in game.js
+          initGame(); // Will be in game.js
         } else {
-          alert('game.js not loaded yet.');
+          alert('Game is not ready yet. Missing game.js');
         }
       }, 2000);
     }
   </script>
+
   <script src="game.js"></script>
 </body>
 </html>
