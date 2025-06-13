@@ -3,21 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Terminal</title> <!-- fun intentional spelling -->
-  <link rel="stylesheet" href="style.css" />
+  <title>Snake.io</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+    .menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+    }
+    h1 {
+      font-size: 4em;
+      color: purple;
+      margin-bottom: 20px;
+    }
+    .play-btn {
+      padding: 15px 40px;
+      font-size: 1.5em;
+      background: black;
+      border: 2px solid purple;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 0px purple;
+    }
+    .play-btn:hover {
+      box-shadow: 0 0 20px purple;
+    }
+    .username-input {
+      margin-bottom: 20px;
+    }
+    .username-input input {
+      padding: 10px;
+      font-size: 1em;
+      width: 250px;
+      text-align: center;
+      border: 2px solid purple;
+      background: black;
+      color: white;
+    }
+    #loadingScreen {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: purple;
+      justify-content: center;
+      align-items: center;
+      z-index: 3;
+      animation: fillScreen 1s forwards;
+    }
+    #loadingScreen p {
+      font-size: 2em;
+      color: white;
+    }
+    @keyframes fillScreen {
+      from { height: 0%; }
+      to { height: 100%; }
+    }
+    canvas {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <div id="terminal">
-    <div id="panes">
-      <div id="command-log"></div>
-      <div id="output"></div>
+  <div class="menu" id="menu">
+    <h1>Snake.io</h1>
+    <div class="username-input">
+      <input type="text" id="username" placeholder="Enter your username" />
     </div>
-    <div id="input-line">
-      <span id="prompt">$</span>
-      <input type="text" id="command" autocomplete="off" spellcheck="false" autofocus />
-    </div>
+    <button class="play-btn" onclick="startGame()">Play</button>
   </div>
 
-  <script src="script.js"></script>
+  <div id="loadingScreen"><p>Loading game...</p></div>
+
+  <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+  <script>
+    function startGame() {
+      const username = document.getElementById('username').value || 'Player';
+      localStorage.setItem('username', username);
+
+      document.getElementById('menu').style.display = 'none';
+      const loading = document.getElementById('loadingScreen');
+      loading.style.display = 'flex';
+
+      setTimeout(() => {
+        loading.style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'block';
+        if (typeof initGame === 'function') {
+          initGame(); // Defined in game.js
+        } else {
+          alert('game.js not loaded yet.');
+        }
+      }, 2000);
+    }
+  </script>
+  <script src="game.js"></script>
 </body>
 </html>
