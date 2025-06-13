@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clean Snake Game</title>
+  <title>Snake.io</title>
   <style>
     html, body {
       margin: 0;
@@ -12,13 +12,14 @@
       font-family: 'Inter', sans-serif;
       overflow: hidden;
       color: #fff;
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><circle cx="4" cy="4" r="2" fill="white"/></svg>') 4 4, auto;
     }
 
     #menu {
       position: absolute;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(to bottom, #1e1e2f, #0a0a0a);
+      background: linear-gradient(to bottom, #1a001a, #0a001a);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -29,14 +30,14 @@
 
     #menu h1 {
       font-size: 3rem;
-      color: #b388ff;
+      color: #d299ff;
       margin-bottom: 1rem;
     }
 
     #usernameInput {
       padding: 12px;
       font-size: 1rem;
-      border: 2px solid #b388ff;
+      border: 2px solid #d299ff;
       background: #000;
       color: #fff;
       border-radius: 8px;
@@ -47,17 +48,16 @@
     #playButton {
       padding: 12px 24px;
       font-size: 1rem;
-      border: 2px solid #b388ff;
+      border: 2px solid #d299ff;
       background: #000;
-      color: #b388ff;
+      color: #d299ff;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s, color 0.3s;
+      transition: box-shadow 0.3s ease-in-out;
     }
 
     #playButton:hover {
-      background: #b388ff;
-      color: #000;
+      box-shadow: 0 0 15px #d299ff;
     }
 
     #gameCanvas {
@@ -70,9 +70,15 @@
       position: absolute;
       width: 100%;
       height: 100%;
-      background: #3f3fff;
+      background: #d299ff;
       z-index: 3;
       animation: rise 2s ease-in-out forwards;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
     }
 
     @keyframes rise {
@@ -88,12 +94,12 @@
 </head>
 <body>
   <div id="menu">
-    <h1>Clean Snake Game</h1>
+    <h1>Snake.io</h1>
     <input type="text" id="usernameInput" placeholder="Enter Username">
     <button id="playButton">Play</button>
   </div>
 
-  <div id="waterOverlay"></div>
+  <div id="waterOverlay">Loading game...</div>
   <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
   <script>
@@ -114,7 +120,6 @@
       }, 2000);
     });
 
-    // === Game Code ===
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
@@ -151,6 +156,8 @@
         this.speed = 2;
         this.dead = false;
         this.target = this.randomTarget();
+        this.respawnTimer = 0;
+        this.id = Math.random().toString(36).substr(2, 9);
       }
 
       randomTarget() {
@@ -158,7 +165,17 @@
       }
 
       update() {
-        if (this.dead) return;
+        if (this.dead) {
+          this.respawnTimer--;
+          if (this.respawnTimer <= 0) {
+            this.dead = false;
+            this.segments = [{ x: Math.random() * W, y: Math.random() * H }];
+            this.length = 20;
+            this.score = 0;
+            this.target = this.randomTarget();
+          }
+          return;
+        }
 
         let dx, dy;
         if (this.isPlayer && this.mousePos) {
@@ -230,6 +247,20 @@
             snake.grow(3);
           }
         });
+
+        SNAKES.forEach(other => {
+          if (other !== snake && !other.dead) {
+            for (let i = 0; i < other.segments.length; i++) {
+              const seg = other.segments[i];
+              if (Math.hypot(snake.segments[0].x - seg.x, snake.segments[0].y - seg.y) < 6) {
+                if (other.segments[0].x === seg.x && other.segments[0].y === seg.y) continue;
+                snake.dead = true;
+                snake.respawnTimer = Math.floor(120 + Math.random() * 60);
+                break;
+              }
+            }
+          }
+        });
       });
     }
 
@@ -238,7 +269,7 @@
       ctx.globalAlpha = 0.6;
       ctx.fillRect(W - 200, 20, 180, 240);
       ctx.globalAlpha = 1;
-      ctx.fillStyle = '#b388ff';
+      ctx.fillStyle = '#d299ff';
       ctx.font = 'bold 16px Inter';
       ctx.fillText('Leaderboard', W - 180, 40);
       const top = [...SNAKES.filter(s => !s.dead)].sort((a, b) => b.score - a.score).slice(0, 10);
