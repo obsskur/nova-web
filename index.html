@@ -8,31 +8,29 @@
     html, body {
       margin: 0;
       padding: 0;
-      background: #0a0a0a;
+      background: #000;
       font-family: 'Inter', sans-serif;
       overflow: hidden;
       color: #fff;
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6"><circle cx="3" cy="3" r="2" fill="white"/></svg>') 3 3, auto;
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><circle cx="4" cy="4" r="2" fill="white"/></svg>') 4 4, auto;
     }
-
     #menu {
       position: absolute;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(to bottom, #1a001a, #0a001a);
+      background: #000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 2;
+      transition: top 1s ease-in-out;
     }
-
     #menu h1 {
       font-size: 3rem;
       color: #d299ff;
       margin-bottom: 1rem;
     }
-
     #usernameInput {
       padding: 12px;
       font-size: 1rem;
@@ -43,7 +41,6 @@
       outline: none;
       margin-bottom: 1rem;
     }
-
     #playButton {
       padding: 12px 24px;
       font-size: 1rem;
@@ -52,26 +49,37 @@
       color: #d299ff;
       border-radius: 8px;
       cursor: pointer;
+      box-shadow: 0 0 15px #d299ff;
       transition: box-shadow 0.3s ease-in-out;
     }
-
     #playButton:hover {
-      box-shadow: 0 0 15px #d299ff;
+      box-shadow: 0 0 25px #d299ff;
     }
-
     #gameCanvas {
       display: block;
       width: 100vw;
       height: 100vh;
-    }
-
-    #waterOverlay {
+      background: #000;
       position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    #bubbleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
+      z-index: 0;
+    }
+    #waterOverlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
       background: #d299ff;
       z-index: 3;
-      top: 100%;
+      animation: rise 2s ease-in-out forwards;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -79,228 +87,133 @@
       font-weight: bold;
       color: #fff;
     }
-
-    .rise {
-      animation: rise 2s ease-in-out forwards;
-    }
-
-    .sink {
-      animation: sink 2s ease-in-out forwards;
-    }
-
     @keyframes rise {
-      0% { top: 100%; }
-      100% { top: 0%; }
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(0%); }
     }
-
     @keyframes sink {
-      0% { top: 0%; }
-      100% { top: 100%; }
+      0% { transform: translateY(0%); }
+      100% { transform: translateY(100%); }
     }
   </style>
 </head>
 <body>
+  <canvas id="bubbleCanvas"></canvas>
   <div id="menu">
     <h1>Snake.io</h1>
     <input type="text" id="usernameInput" placeholder="Enter Username">
     <button id="playButton">Play</button>
   </div>
-
   <div id="waterOverlay">Loading game...</div>
   <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width;
-    const H = canvas.height;
-    const ORB_COUNT = 100;
-    const BOT_COUNT = 16;
-    const ORBS = [];
-    const SNAKES = [];
+    const bubbleCanvas = document.getElementById('bubbleCanvas');
+    const bubbleCtx = bubbleCanvas.getContext('2d');
+    bubbleCanvas.width = window.innerWidth;
+    bubbleCanvas.height = window.innerHeight;
 
-    const menu = document.getElementById('menu');
-    const water = document.getElementById('waterOverlay');
-    const playBtn = document.getElementById('playButton');
+    const bubbles = [];
+    class Bubble {
+      constructor() {
+        this.x = Math.random() * bubbleCanvas.width;
+        this.y = bubbleCanvas.height + Math.random() * 100;
+        this.radius = 2 + Math.random() * 4;
+        this.speed = 0.5 + Math.random();
+        this.alpha = 0.3 + Math.random() * 0.3;
+      }
+      update() {
+        this.y -= this.speed;
+        if (this.y + this.radius < 0) {
+          this.y = bubbleCanvas.height + Math.random() * 100;
+          this.x = Math.random() * bubbleCanvas.width;
+        }
+      }
+      draw() {
+        bubbleCtx.beginPath();
+        bubbleCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        bubbleCtx.fillStyle = `rgba(210, 153, 255, ${this.alpha})`;
+        bubbleCtx.fill();
+      }
+    }
+    function animateBubbles() {
+      bubbleCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
+      while (bubbles.length < 100) bubbles.push(new Bubble());
+      bubbles.forEach(b => { b.update(); b.draw(); });
+      requestAnimationFrame(animateBubbles);
+    }
+    animateBubbles();
+  </script>
 
-    playBtn.addEventListener('click', () => {
+  <script>
+    document.getElementById('playButton').addEventListener('click', () => {
       const username = document.getElementById('usernameInput').value.trim();
       if (!username) return;
-
       localStorage.setItem('username', username);
-      menu.style.display = 'none';
-
-      water.classList.add('rise');
-
+      document.getElementById('menu').style.top = '-100vh';
+      document.getElementById('waterOverlay').style.animation = 'sink 2s ease-in-out forwards';
       setTimeout(() => {
-        water.classList.remove('rise');
-        water.classList.add('sink');
-
-        setTimeout(() => {
-          water.style.display = 'none';
-          initGame();
-        }, 2000);
+        document.getElementById('waterOverlay').remove();
+        initGame();
       }, 2000);
     });
 
-    class Orb {
-      constructor() {
-        this.x = Math.random() * W;
-        this.y = Math.random() * H;
-        this.radius = 5;
-        this.color = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
-      }
-      draw() {
+    function initGame() {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const username = localStorage.getItem('username') || 'Player';
+      const keys = {};
+      document.addEventListener('keydown', e => keys[e.key] = true);
+      document.addEventListener('keyup', e => keys[e.key] = false);
+
+      const snake = [{ x: 0, y: 0 }];
+      let direction = 0;
+      let speed = 2;
+      let score = 0;
+      const food = { x: Math.random() * 2000 - 1000, y: Math.random() * 2000 - 1000 };
+
+      function drawCircle(x, y, r, color) {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = color;
         ctx.fill();
       }
-    }
 
-    class Snake {
-      constructor(name, isPlayer = false) {
-        this.name = name;
-        this.isPlayer = isPlayer;
-        this.color = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
-        this.segments = [{ x: Math.random() * W, y: Math.random() * H }];
-        this.length = 20;
-        this.score = 0;
-        this.speed = 2;
-        this.dead = false;
-        this.target = this.randomTarget();
-        this.respawnTimer = 0;
-      }
+      function gameLoop() {
+        requestAnimationFrame(gameLoop);
 
-      randomTarget() {
-        return { x: Math.random() * W, y: Math.random() * H };
-      }
+        if (keys['ArrowLeft']) direction -= 0.05;
+        if (keys['ArrowRight']) direction += 0.05;
 
-      update() {
-        if (this.dead) {
-          this.respawnTimer--;
-          if (this.respawnTimer <= 0) {
-            this.dead = false;
-            this.segments = [{ x: Math.random() * W, y: Math.random() * H }];
-            this.length = 20;
-            this.score = 0;
-            this.target = this.randomTarget();
-          }
-          return;
+        const head = { x: snake[0].x + Math.cos(direction) * speed, y: snake[0].y + Math.sin(direction) * speed };
+        snake.unshift(head);
+        while (snake.length > 100 + score) snake.pop();
+
+        if (Math.hypot(head.x - food.x, head.y - food.y) < 10) {
+          score++;
+          food.x = Math.random() * 2000 - 1000;
+          food.y = Math.random() * 2000 - 1000;
         }
 
-        let dx, dy;
-        if (this.isPlayer && this.mousePos) {
-          dx = this.mousePos.x - this.segments[0].x;
-          dy = this.mousePos.y - this.segments[0].y;
-        } else {
-          dx = this.target.x - this.segments[0].x;
-          dy = this.target.y - this.segments[0].y;
-          if (Math.hypot(dx, dy) < 10) this.target = this.randomTarget();
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const camX = head.x - canvas.width / 2;
+        const camY = head.y - canvas.height / 2;
+
+        drawCircle(food.x - camX, food.y - camY, 8, '#d299ff');
+        for (let i = 0; i < snake.length; i++) {
+          drawCircle(snake[i].x - camX, snake[i].y - camY, 6, '#fff');
         }
 
-        const angle = Math.atan2(dx, dy);
-        const newX = this.segments[0].x + Math.cos(angle) * this.speed;
-        const newY = this.segments[0].y + Math.sin(angle) * this.speed;
-
-        this.segments.unshift({ x: newX, y: newY });
-        while (this.segments.length > this.length) this.segments.pop();
-      }
-
-      grow(amount) {
-        this.length += amount;
-        this.score += amount;
-      }
-
-      draw() {
-        if (this.dead) return;
-        ctx.fillStyle = this.color;
-        this.segments.forEach(s => ctx.fillRect(s.x, s.y, 6, 6));
-        const head = this.segments[0];
         ctx.fillStyle = '#fff';
-        ctx.fillText(`${this.name} (${this.score})`, head.x + 10, head.y);
+        ctx.font = '18px Inter';
+        ctx.fillText(`${username} - Score: ${score}`, 20, 30);
       }
-    }
 
-    function spawnOrbs() {
-      for (let i = 0; i < ORB_COUNT; i++) ORBS.push(new Orb());
-    }
-
-    function spawnBots() {
-      for (let i = 0; i < BOT_COUNT; i++) {
-        SNAKES.push(new Snake("Bot" + (i + 1)));
-      }
-    }
-
-    function spawnPlayer() {
-      const username = localStorage.getItem("username") || "You";
-      const player = new Snake(username, true);
-      SNAKES.push(player);
-      canvas.addEventListener("mousemove", e => {
-        const rect = canvas.getBoundingClientRect();
-        player.mousePos = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-      });
-    }
-
-    function checkCollisions() {
-      SNAKES.forEach(snake => {
-        if (snake.dead) return;
-
-        ORBS.forEach((orb, i) => {
-          if (Math.hypot(snake.segments[0].x - orb.x, snake.segments[0].y - orb.y) < 10) {
-            ORBS.splice(i, 1);
-            ORBS.push(new Orb());
-            snake.grow(3);
-          }
-        });
-
-        SNAKES.forEach(other => {
-          if (other !== snake && !other.dead) {
-            for (let i = 0; i < other.segments.length; i++) {
-              const seg = other.segments[i];
-              if (Math.hypot(snake.segments[0].x - seg.x, snake.segments[0].y - seg.y) < 6) {
-                snake.dead = true;
-                snake.respawnTimer = 120 + Math.random() * 60;
-                break;
-              }
-            }
-          }
-        });
-      });
-    }
-
-    function drawLeaderboard() {
-      ctx.fillStyle = '#222';
-      ctx.globalAlpha = 0.6;
-      ctx.fillRect(W - 200, 20, 180, 240);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#d299ff';
-      ctx.font = 'bold 16px Inter';
-      ctx.fillText('Leaderboard', W - 180, 40);
-      const top = [...SNAKES.filter(s => !s.dead)].sort((a, b) => b.score - a.score).slice(0, 10);
-      ctx.fillStyle = '#fff';
-      top.forEach((s, i) => {
-        ctx.fillText(`${i + 1}. ${s.name} (${s.score})`, W - 180, 60 + i * 20);
-      });
-    }
-
-    function gameLoop() {
-      ctx.clearRect(0, 0, W, H);
-      ORBS.forEach(o => o.draw());
-      SNAKES.forEach(s => s.update());
-      checkCollisions();
-      SNAKES.forEach(s => s.draw());
-      drawLeaderboard();
-      requestAnimationFrame(gameLoop);
-    }
-
-    function initGame() {
-      spawnOrbs();
-      spawnBots();
-      spawnPlayer();
       gameLoop();
     }
   </script>
