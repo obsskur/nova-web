@@ -3,138 +3,267 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Snake.io</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Clean Snake Game</title>
   <style>
-    * {
+    html, body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
+      background: #0a0a0a;
       font-family: 'Inter', sans-serif;
-      background-color: #000;
-      color: #fff;
       overflow: hidden;
+      color: #fff;
     }
 
-    .menu {
+    #menu {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, #1e1e2f, #0a0a0a);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      text-align: center;
+      justify-content: center;
       z-index: 2;
+      transition: top 1s ease-in-out;
     }
 
-    h1 {
-      font-size: 3.5rem;
+    #menu h1 {
+      font-size: 3rem;
       color: #b388ff;
-      letter-spacing: 1px;
+      margin-bottom: 1rem;
     }
 
-    .username-input input {
-      padding: 12px 20px;
+    #usernameInput {
+      padding: 12px;
       font-size: 1rem;
-      border: 1px solid #b388ff;
-      background: #111;
+      border: 2px solid #b388ff;
+      background: #000;
       color: #fff;
       border-radius: 8px;
       outline: none;
-      width: 250px;
-      transition: border 0.3s;
+      margin-bottom: 1rem;
     }
 
-    .username-input input:focus {
-      border-color: #c2a6ff;
-    }
-
-    .play-btn {
-      padding: 14px 36px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      background: #1a1a1a;
+    #playButton {
+      padding: 12px 24px;
+      font-size: 1rem;
       border: 2px solid #b388ff;
-      color: #fff;
-      border-radius: 10px;
+      background: #000;
+      color: #b388ff;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background 0.3s, color 0.3s;
     }
 
-    .play-btn:hover {
-      box-shadow: 0 0 12px #b388ff;
-      background-color: #2a2a2a;
+    #playButton:hover {
+      background: #b388ff;
+      color: #000;
     }
 
-    #loadingScreen {
-      display: none;
+    #gameCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #waterOverlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
       width: 100%;
-      background-color: #b388ff;
-      justify-content: center;
-      align-items: center;
+      height: 100%;
+      background: #3f3fff;
       z-index: 3;
-      animation: fillScreen 1s forwards;
+      animation: rise 2s ease-in-out forwards;
     }
 
-    #loadingScreen p {
-      font-size: 2rem;
-      color: #fff;
+    @keyframes rise {
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(0%); }
     }
 
-    @keyframes fillScreen {
-      from { height: 0%; }
-      to { height: 100%; }
-    }
-
-    canvas {
-      display: none;
+    @keyframes sink {
+      0% { transform: translateY(0%); }
+      100% { transform: translateY(100%); }
     }
   </style>
 </head>
 <body>
-  <div class="menu" id="menu">
-    <h1>Snake.io</h1>
-    <div class="username-input">
-      <input type="text" id="username" placeholder="Enter your username" />
-    </div>
-    <button class="play-btn" onclick="startGame()">Play</button>
+  <div id="menu">
+    <h1>Clean Snake Game</h1>
+    <input type="text" id="usernameInput" placeholder="Enter Username">
+    <button id="playButton">Play</button>
   </div>
 
-  <div id="loadingScreen"><p>Loading game...</p></div>
-
+  <div id="waterOverlay"></div>
   <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
   <script>
-    function startGame() {
-      const username = document.getElementById('username').value || 'Player';
+    document.getElementById('playButton').addEventListener('click', () => {
+      const username = document.getElementById('usernameInput').value.trim();
+      if (!username) return;
       localStorage.setItem('username', username);
 
-      document.getElementById('menu').style.display = 'none';
-      const loading = document.getElementById('loadingScreen');
-      loading.style.display = 'flex';
+      const menu = document.getElementById('menu');
+      menu.style.top = '-100vh';
+
+      const water = document.getElementById('waterOverlay');
+      water.style.animation = 'sink 2s ease-in-out forwards';
 
       setTimeout(() => {
-        loading.style.display = 'none';
-        document.getElementById('gameCanvas').style.display = 'block';
-        if (typeof initGame === 'function') {
-          initGame(); // Will be in game.js
-        } else {
-          alert('Game is not ready yet. Missing game.js');
-        }
+        water.remove();
+        initGame();
       }, 2000);
+    });
+
+    // === Game Code ===
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const ORB_COUNT = 100;
+    const BOT_COUNT = 16;
+    const ORBS = [];
+    const SNAKES = [];
+
+    class Orb {
+      constructor() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.radius = 5;
+        this.color = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+
+    class Snake {
+      constructor(name, isPlayer = false) {
+        this.name = name;
+        this.isPlayer = isPlayer;
+        this.color = "hsl(" + Math.random() * 360 + ", 100%, 50%)";
+        this.segments = [{ x: Math.random() * W, y: Math.random() * H }];
+        this.length = 20;
+        this.score = 0;
+        this.speed = 2;
+        this.dead = false;
+        this.target = this.randomTarget();
+      }
+
+      randomTarget() {
+        return { x: Math.random() * W, y: Math.random() * H };
+      }
+
+      update() {
+        if (this.dead) return;
+
+        let dx, dy;
+        if (this.isPlayer && this.mousePos) {
+          dx = this.mousePos.x - this.segments[0].x;
+          dy = this.mousePos.y - this.segments[0].y;
+        } else {
+          dx = this.target.x - this.segments[0].x;
+          dy = this.target.y - this.segments[0].y;
+          if (Math.hypot(dx, dy) < 10) this.target = this.randomTarget();
+        }
+
+        const angle = Math.atan2(dy, dx);
+        const newX = this.segments[0].x + Math.cos(angle) * this.speed;
+        const newY = this.segments[0].y + Math.sin(angle) * this.speed;
+
+        this.segments.unshift({ x: newX, y: newY });
+        while (this.segments.length > this.length) this.segments.pop();
+      }
+
+      grow(amount) {
+        this.length += amount;
+        this.score += amount;
+      }
+
+      draw() {
+        if (this.dead) return;
+        ctx.fillStyle = this.color;
+        this.segments.forEach(s => ctx.fillRect(s.x, s.y, 6, 6));
+        const head = this.segments[0];
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`${this.name} (${this.score})`, head.x + 10, head.y);
+      }
+    }
+
+    function spawnOrbs() {
+      for (let i = 0; i < ORB_COUNT; i++) ORBS.push(new Orb());
+    }
+
+    function spawnBots() {
+      for (let i = 0; i < BOT_COUNT; i++) {
+        const bot = new Snake("Bot" + (i + 1));
+        SNAKES.push(bot);
+      }
+    }
+
+    function spawnPlayer() {
+      const username = localStorage.getItem("username") || "You";
+      const player = new Snake(username, true);
+      SNAKES.push(player);
+
+      canvas.addEventListener("mousemove", e => {
+        const rect = canvas.getBoundingClientRect();
+        player.mousePos = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      });
+    }
+
+    function checkCollisions() {
+      SNAKES.forEach(snake => {
+        if (snake.dead) return;
+        ORBS.forEach((orb, i) => {
+          if (
+            Math.hypot(snake.segments[0].x - orb.x, snake.segments[0].y - orb.y) < 10
+          ) {
+            ORBS.splice(i, 1);
+            ORBS.push(new Orb());
+            snake.grow(3);
+          }
+        });
+      });
+    }
+
+    function drawLeaderboard() {
+      ctx.fillStyle = '#222';
+      ctx.globalAlpha = 0.6;
+      ctx.fillRect(W - 200, 20, 180, 240);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#b388ff';
+      ctx.font = 'bold 16px Inter';
+      ctx.fillText('Leaderboard', W - 180, 40);
+      const top = [...SNAKES.filter(s => !s.dead)].sort((a, b) => b.score - a.score).slice(0, 10);
+      ctx.fillStyle = '#fff';
+      top.forEach((s, i) => {
+        ctx.fillText(`${i + 1}. ${s.name} (${s.score})`, W - 180, 60 + i * 20);
+      });
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, W, H);
+      ORBS.forEach(o => o.draw());
+      SNAKES.forEach(s => s.update());
+      checkCollisions();
+      SNAKES.forEach(s => s.draw());
+      drawLeaderboard();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function initGame() {
+      spawnOrbs();
+      spawnBots();
+      spawnPlayer();
+      gameLoop();
     }
   </script>
-
-  <script src="game.js"></script>
 </body>
 </html>
